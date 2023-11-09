@@ -166,7 +166,8 @@ bool ParametricEQ2AudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* ParametricEQ2AudioProcessor::createEditor()
 {
-    return new ParametricEQ2AudioProcessorEditor (*this);
+    //return new ParametricEQ2AudioProcessorEditor(*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -181,6 +182,110 @@ void ParametricEQ2AudioProcessor::setStateInformation (const void* data, int siz
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout ParametricEQ2AudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    //Band Frequencies
+    layout.add(
+        std::make_unique<juce::AudioParameterFloat>(
+            "band1_freq",
+            "Band 1 Freq",
+            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+            20.f
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterFloat>(
+            "band2_freq",
+            "Band 2 Freq",
+            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+            1000.f
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterFloat>(
+            "band3_freq",
+            "Band 3 Freq",
+            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+            20000.f
+        )
+    );
+
+    //Band Types
+    juce::StringArray bandTypes;
+    bandTypes.add("Low Pass");
+    bandTypes.add("Band Pass");
+    bandTypes.add("High Pass");
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band1_type",
+            "Band 1 Type",
+            bandTypes,
+            0
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band2_type",
+            "Band 2 Type",
+            bandTypes,
+            0
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band3_type",
+            "Band 3 Type",
+            bandTypes,
+            0
+        )
+    );
+
+    //Band slopes
+    juce::StringArray bandSlopes;
+    for (int i = 0; i < 4; ++i) {
+        juce::String str;
+        str << (12 + i * 12);
+        str << " db/Oct";
+        bandSlopes.add(str);
+    }
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band1_slope",
+            "Band 1 Slope",
+            bandSlopes,
+            0
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band2_slope",
+            "Band 2 Slope",
+            bandSlopes,
+            0
+        )
+    );
+
+    layout.add(
+        std::make_unique<juce::AudioParameterChoice>(
+            "band3_slope",
+            "Band 3 Slope",
+            bandSlopes,
+            0
+        )
+    );
+
+    return layout;
 }
 
 //==============================================================================
