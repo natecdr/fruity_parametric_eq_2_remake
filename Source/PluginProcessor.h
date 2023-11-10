@@ -60,6 +60,13 @@ public:
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
 
 private:
+    using Filter = juce::dsp::IIR::Filter<float>;
+
+    using BandFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+
+    using MonoChain = juce::dsp::ProcessorChain<BandFilter, BandFilter, BandFilter>;
+
+    MonoChain leftChain, rightChain;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParametricEQ2AudioProcessor)
 };
