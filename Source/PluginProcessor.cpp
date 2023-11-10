@@ -155,16 +155,8 @@ void ParametricEQ2AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 		buffer.clear(i, 0, buffer.getNumSamples());
 
 	auto chainSettings = getChainSettings(apvts);
-	auto band1_coefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
-		getSampleRate(),
-		chainSettings.band1_freq,
-		1.f,
-		juce::Decibels::decibelsToGain(chainSettings.band1_gain)
-	);
 
-	*leftChain.get<ChainPositions::Band1>().get<0>().coefficients = *band1_coefficients;
-	*rightChain.get<ChainPositions::Band1>().get<0>().coefficients = *band1_coefficients;
-
+	updateFilters(chainSettings);
 
 	juce::dsp::AudioBlock<float> block(buffer);
 	auto leftBlock = block.getSingleChannelBlock(0);
@@ -203,24 +195,44 @@ void ParametricEQ2AudioProcessor::setStateInformation(const void* data, int size
 	// whose contents will have been created by the getStateInformation() call.
 }
 
+Coefficients makePeakFilter(const BandSettings& bandSettings, double sampleRate)
+{
+	return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+		sampleRate,
+		bandSettings.band_freq,
+		1.f,
+		juce::Decibels::decibelsToGain(bandSettings.band_gain)
+	);
+}
+
+void ParametricEQ2AudioProcessor::updateFilters(const ChainSettings& chainSettings)
+{
+	updateBand<0>(chainSettings, leftChain, rightChain, getSampleRate());
+	updateBand<1>(chainSettings, leftChain, rightChain, getSampleRate());
+	updateBand<2>(chainSettings, leftChain, rightChain, getSampleRate());
+}
+
+void updateCoefficients(Coefficients& old, const Coefficients& replacement)
+{
+	*old = *replacement;
+}
+
+juce::String getParameterId(int bandNumber, juce::String bandParameter)
+{
+	juce::String str;
+	return str << "band" << bandNumber << "_" << bandParameter;
+}
+
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
 	ChainSettings settings;
 
-	settings.band1_freq = apvts.getRawParameterValue("band1_freq")->load();
-	settings.band1_gain = apvts.getRawParameterValue("band1_gain")->load();
-	settings.band1_slope = static_cast<Slope>(apvts.getRawParameterValue("band1_slope")->load());
-	settings.band1_type = static_cast<BandType>(apvts.getRawParameterValue("band1_type")->load());
-
-	settings.band2_freq = apvts.getRawParameterValue("band2_freq")->load();
-	settings.band2_gain = apvts.getRawParameterValue("band2_gain")->load();
-	settings.band2_slope = static_cast<Slope>(apvts.getRawParameterValue("band2_slope")->load());
-	settings.band2_type = static_cast<BandType>(apvts.getRawParameterValue("band2_type")->load());
-
-	settings.band3_freq = apvts.getRawParameterValue("band3_freq")->load();
-	settings.band3_gain = apvts.getRawParameterValue("band3_gain")->load();
-	settings.band3_slope = static_cast<Slope>(apvts.getRawParameterValue("band3_slope")->load());
-	settings.band3_type = static_cast<BandType>(apvts.getRawParameterValue("band3_type")->load());
+	for (int i = 0; i < sizeof(settings.bandSettings) / sizeof(settings.bandSettings[0]); ++i) {
+		settings.bandSettings[i].band_freq = apvts.getRawParameterValue(getParameterId(i + 1, "freq"))->load();
+		settings.bandSettings[i].band_gain = apvts.getRawParameterValue(getParameterId(i + 1, "gain"))->load();
+		settings.bandSettings[i].band_slope = static_cast<Slope>(apvts.getRawParameterValue(getParameterId(i + 1, "slope"))->load());
+		settings.bandSettings[i].band_type = static_cast<BandType>(apvts.getRawParameterValue(getParameterId(i + 1, "type"))->load());
+	}	
 
 	return settings;
 }
@@ -296,7 +308,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParametricEQ2AudioProcessor:
 			"band1_type",
 			"Band 1 Type",
 			bandTypes,
-			0
+			1
 		)
 	);
 
@@ -305,7 +317,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParametricEQ2AudioProcessor:
 			"band2_type",
 			"Band 2 Type",
 			bandTypes,
-			0
+			1
 		)
 	);
 
@@ -314,7 +326,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParametricEQ2AudioProcessor:
 			"band3_type",
 			"Band 3 Type",
 			bandTypes,
-			0
+			1
 		)
 	);
 
