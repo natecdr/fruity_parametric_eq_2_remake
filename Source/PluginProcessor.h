@@ -52,37 +52,110 @@ using MonoChain = juce::dsp::ProcessorChain<BandFilter, BandFilter, BandFilter>;
 using Coefficients = Filter::CoefficientsPtr;
 void updateCoefficients(Coefficients& old, const Coefficients& replacement);
 
-void updateSingleFilter(const ChainSettings& chainSettings);
-
 template<int Index, typename ChainType>
 void updateBand(const ChainSettings& chainSettings, ChainType& leftChain, ChainType& rightChain, double sampleRate)
 {
 	auto& leftChainBand = leftChain.get<Index>();
 	auto& rightChainBand = rightChain.get<Index>();
 
-	switch (chainSettings.bandSettings[Index].band_type)
+	auto bandSettings = chainSettings.bandSettings[Index];
+
+	switch (bandSettings.band_type)
 	{
 	case BandType::LowPass:
-		DBG("lowpass");
+	{
+		auto lowpass_coefficients = makeLowPassFilter(bandSettings, sampleRate);
+
+		updateLowHighPassFilter(leftChainBand, lowpass_coefficients, bandSettings.band_slope);
+		updateLowHighPassFilter(rightChainBand, lowpass_coefficients, bandSettings.band_slope);
 		break;
+	}
 	case BandType::Peak:
-		updatePeakFilter(chainSettings.bandSettings[Index], leftChainBand, sampleRate);
-		updatePeakFilter(chainSettings.bandSettings[Index], rightChainBand, sampleRate);
+	{
+		auto peak_coefficients = makePeakFilter(bandSettings, sampleRate);
+
+		updatePeakFilter(leftChainBand, peak_coefficients);
+		updatePeakFilter(rightChainBand, peak_coefficients);
 		break;
+	}
 	case BandType::HighPass:
-		DBG("highpass");
+	{
+		auto highpass_coefficients = makeHighPassFilter(bandSettings, sampleRate);
+
+		updateLowHighPassFilter(leftChainBand, highpass_coefficients, bandSettings.band_slope);
+		updateLowHighPassFilter(rightChainBand, highpass_coefficients, bandSettings.band_slope);
 		break;
+	}
 	}
 }
 
-template<typename BandType>
-void updatePeakFilter(const BandSettings& bandSettings, BandType& band, double sampleRate)
+template<typename BandType, typename CoefficientsType>
+void updatePeakFilter(BandType& band, CoefficientsType& coefficients)
 {
-	auto peak_coefficients = makePeakFilter(bandSettings, sampleRate);
-	updateCoefficients(band.get<0>().coefficients, peak_coefficients);
+	band.template setBypassed<1>(true);
+	band.template setBypassed<2>(true);
+	band.template setBypassed<3>(true);
+
+	updateCoefficients(band.get<0>().coefficients, coefficients);
 }
 
-Coefficients makePeakFilter(const BandSettings& bandSettings, double sampleRate);
+template<typename BandType, typename CoefficientsType>
+void updateLowHighPassFilter(BandType& band, CoefficientsType& coefficients, Slope& slope) {
+	band.setBypassed<0>(true);
+	band.setBypassed<1>(true);
+	band.setBypassed<2>(true);
+	band.setBypassed<3>(true);
+
+	switch (slope)
+	{
+	case Slope_48:
+	{
+		updateCoefficients(band.get<3>().coefficients, coefficients[3]);
+		band.setBypassed<3>(false);
+	}
+	case Slope_36:
+	{
+		updateCoefficients(band.get<2>().coefficients, coefficients[2]);
+		band.setBypassed<2>(false);
+	}
+	case Slope_24:
+	{
+		updateCoefficients(band.get<1>().coefficients, coefficients[1]);
+		band.setBypassed<1>(false);
+	}
+	case Slope_12:
+	{
+		updateCoefficients(band.get<0>().coefficients, coefficients[0]);
+		band.setBypassed<0>(false);
+	}
+	}
+}
+
+inline auto makePeakFilter(const BandSettings& bandSettings, double sampleRate) {
+	return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+		sampleRate,
+		bandSettings.band_freq,
+		1.f,
+		juce::Decibels::decibelsToGain(bandSettings.band_gain)
+	);
+}
+
+inline auto makeLowPassFilter(const BandSettings& bandSettings, double sampleRate) {
+	return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
+		bandSettings.band_freq,
+		sampleRate,
+		2 * (bandSettings.band_slope + 1)
+	);
+}
+
+inline auto makeHighPassFilter(const BandSettings& bandSettings, double sampleRate) {
+	return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+		bandSettings.band_freq,
+		sampleRate,
+		2 * (bandSettings.band_slope + 1)
+	);
+}
+
 
 class ParametricEQ2AudioProcessor : public juce::AudioProcessor
 #if JucePlugin_Enable_ARA

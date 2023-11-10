@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    This file contains the basic framework code for a JUCE plugin editor.
+	This file contains the basic framework code for a JUCE plugin editor.
 
   ==============================================================================
 */
@@ -14,20 +14,20 @@
 //==============================================================================
 /**
 */
-class ParametricEQ2AudioProcessorEditor  : public juce::AudioProcessorEditor
+class ParametricEQ2AudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
-    ParametricEQ2AudioProcessorEditor (ParametricEQ2AudioProcessor&);
-    ~ParametricEQ2AudioProcessorEditor() override;
+	ParametricEQ2AudioProcessorEditor(ParametricEQ2AudioProcessor&);
+	~ParametricEQ2AudioProcessorEditor() override;
 
-    //==============================================================================
-    void paint (juce::Graphics&) override;
-    void resized() override;
+	//==============================================================================
+	void paint(juce::Graphics&) override;
+	void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    ParametricEQ2AudioProcessor& audioProcessor;
+	// This reference is provided as a quick way for your editor to
+	// access the processor object that created it.
+	ParametricEQ2AudioProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParametricEQ2AudioProcessorEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametricEQ2AudioProcessorEditor)
 };

@@ -195,16 +195,6 @@ void ParametricEQ2AudioProcessor::setStateInformation(const void* data, int size
 	// whose contents will have been created by the getStateInformation() call.
 }
 
-Coefficients makePeakFilter(const BandSettings& bandSettings, double sampleRate)
-{
-	return juce::dsp::IIR::Coefficients<float>::makePeakFilter(
-		sampleRate,
-		bandSettings.band_freq,
-		1.f,
-		juce::Decibels::decibelsToGain(bandSettings.band_gain)
-	);
-}
-
 void ParametricEQ2AudioProcessor::updateFilters(const ChainSettings& chainSettings)
 {
 	updateBand<0>(chainSettings, leftChain, rightChain, getSampleRate());
@@ -232,7 +222,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 		settings.bandSettings[i].band_gain = apvts.getRawParameterValue(getParameterId(i + 1, "gain"))->load();
 		settings.bandSettings[i].band_slope = static_cast<Slope>(apvts.getRawParameterValue(getParameterId(i + 1, "slope"))->load());
 		settings.bandSettings[i].band_type = static_cast<BandType>(apvts.getRawParameterValue(getParameterId(i + 1, "type"))->load());
-	}	
+	}
 
 	return settings;
 }
