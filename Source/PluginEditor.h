@@ -35,6 +35,18 @@ struct CustomRotarySlider : juce::Slider
 	}
 };
 
+struct CustomChoiceSlider : juce::Slider
+{
+	CustomChoiceSlider() :
+		juce::Slider(
+			juce::Slider::SliderStyle::RotaryVerticalDrag,
+			juce::Slider::TextEntryBoxPosition::NoTextBox
+		)
+	{
+
+	}
+};
+
 //==============================================================================
 /**
 */
@@ -58,12 +70,17 @@ private:
 	CustomRotarySlider band1FreqRotarySlider, band2FreqRotarySlider, band3FreqRotarySlider;
 	CustomRotarySlider band1BandWidthRotarySlider, band2BandWidthRotarySlider, band3BandWidthRotarySlider;
 
+	CustomChoiceSlider band1SlopeChoiceSlider, band2SlopeChoiceSlider, band3SlopeChoiceSlider;
+	CustomChoiceSlider band1TypeChoiceSlider, band2TypeChoiceSlider, band3TypeChoiceSlider;
+
 	using APVTS = juce::AudioProcessorValueTreeState;
 	using Attachment = APVTS::SliderAttachment;
 
 	Attachment band1GainVerticalSliderAttachment, band2GainVerticalSliderAttachment, band3GainVerticalSliderAttachment;
 	Attachment band1FreqRotarySliderAttachment, band2FreqRotarySliderAttachment, band3FreqRotarySliderAttachment;
-	//Attachment band1BandWidthRotarySliderAttachment, band2BandWidthRotarySliderAttachment, band3BandWidthRotarySliderAttachment;
+
+	Attachment band1SlopeChoiceSliderAttachment, band2SlopeChoiceSliderAttachment, band3SlopeChoiceSliderAttachment;
+	Attachment band1TypeChoiceSliderAttachment, band2TypeChoiceSliderAttachment, band3TypeChoiceSliderAttachment;
 
 	std::vector<juce::Component*> getComponents();
 
