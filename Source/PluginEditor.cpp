@@ -11,7 +11,13 @@
 
 //==============================================================================
 ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricEQ2AudioProcessor& p)
-	: AudioProcessorEditor(&p), audioProcessor(p)
+	: AudioProcessorEditor(&p), audioProcessor(p),
+	band1GainVerticalSliderAttachment(audioProcessor.apvts, "band1_gain", band1GainVerticalSlider),
+	band2GainVerticalSliderAttachment(audioProcessor.apvts, "band2_gain", band2GainVerticalSlider),
+	band3GainVerticalSliderAttachment(audioProcessor.apvts, "band3_gain", band3GainVerticalSlider),
+	band1FreqRotarySliderAttachment(audioProcessor.apvts, "band1_freq", band1FreqRotarySlider),
+	band2FreqRotarySliderAttachment(audioProcessor.apvts, "band2_freq", band2FreqRotarySlider),
+	band3FreqRotarySliderAttachment(audioProcessor.apvts, "band3_freq", band3FreqRotarySlider)
 {
 	// Make sure that before the constructor has finished, you've set the
 	// editor's size to whatever you need it to be.
