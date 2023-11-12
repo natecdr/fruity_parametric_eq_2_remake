@@ -92,9 +92,9 @@ void updateBand(const ChainSettings& chainSettings, ChainType& leftChain, ChainT
 template<typename BandType, typename CoefficientsType>
 void updatePeakFilter(BandType& band, CoefficientsType& coefficients)
 {
-	band.template setBypassed<1>(true);
-	band.template setBypassed<2>(true);
-	band.template setBypassed<3>(true);
+	band.setBypassed<1>(true);
+	band.setBypassed<2>(true);
+	band.setBypassed<3>(true);
 
 	updateCoefficients(band.get<0>().coefficients, coefficients);
 }
@@ -206,8 +206,7 @@ public:
 private:
 	MonoChain leftChain, rightChain;
 
-	void updateFilters(const ChainSettings& chainSettings);
-	void updateBandFilter(int index, const ChainSettings& chainSettings);
+	void updateFilters();
 
 	juce::StringRef getParameterId(int bandNumber, juce::StringRef bandParameter);
 

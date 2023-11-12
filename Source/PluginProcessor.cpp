@@ -156,7 +156,7 @@ void ParametricEQ2AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
 	auto chainSettings = getChainSettings(apvts);
 
-	updateFilters(chainSettings);
+	updateFilters();
 
 	juce::dsp::AudioBlock<float> block(buffer);
 	auto leftBlock = block.getSingleChannelBlock(0);
@@ -187,16 +187,26 @@ void ParametricEQ2AudioProcessor::getStateInformation(juce::MemoryBlock& destDat
 	// You should use this method to store your parameters in the memory block.
 	// You could do that either as raw data, or use the XML or ValueTree classes
 	// as intermediaries to make it easy to save and load complex data.
+	juce::MemoryOutputStream mos(destData, true);
+	apvts.state.writeToStream(mos);
 }
 
 void ParametricEQ2AudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
 	// You should use this method to restore your parameters from this memory block,
 	// whose contents will have been created by the getStateInformation() call.
+	auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+	if (tree.isValid())
+	{
+		apvts.replaceState(tree);
+		updateFilters();
+	}
 }
 
-void ParametricEQ2AudioProcessor::updateFilters(const ChainSettings& chainSettings)
+void ParametricEQ2AudioProcessor::updateFilters()
 {
+	auto chainSettings = getChainSettings(apvts);
+
 	updateBand<0>(chainSettings, leftChain, rightChain, getSampleRate());
 	updateBand<1>(chainSettings, leftChain, rightChain, getSampleRate());
 	updateBand<2>(chainSettings, leftChain, rightChain, getSampleRate());

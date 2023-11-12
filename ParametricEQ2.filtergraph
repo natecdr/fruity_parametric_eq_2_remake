@@ -5,7 +5,7 @@
     <PLUGIN name="Audio Input" descriptiveName="" format="Internal" category="I/O devices"
             manufacturer="JUCE" version="1.0" file="" uniqueId="246006c0"
             isInstrument="0" fileTime="0" infoUpdateTime="0" numInputs="0"
-            numOutputs="2" isShell="0" hasARAExtension="0" uid="246006c0"/>
+            numOutputs="8" isShell="0" hasARAExtension="0" uid="246006c0"/>
     <STATE>0.</STATE>
     <LAYOUT>
       <INPUTS>
@@ -39,7 +39,7 @@
     <STATE>0.</STATE>
     <LAYOUT>
       <INPUTS>
-        <BUS index="0" layout="L R"/>
+        <BUS index="0" layout="L R C Lfe Lss Rss Lrs Rrs"/>
       </INPUTS>
       <OUTPUTS>
         <BUS index="0" layout="disabled"/>
@@ -65,10 +65,10 @@
           uiLastX_Normal="573" uiLastY_Normal="226" uiopen_Normal="1">
     <PLUGIN name="ParametricEQ2" format="VST3" category="Fx" manufacturer="yourcompany"
             version="1.0.0" file="C:\Users\natha\OneDrive\Documents\Code\ParametricEQ2\Builds\VisualStudio2022\x64\Debug\VST3\ParametricEQ2.vst3\Contents\x86_64-win\ParametricEQ2.vst3"
-            uniqueId="ee6bd526" isInstrument="0" fileTime="18bb9bd7de8" infoUpdateTime="18bb9bde327"
+            uniqueId="ee6bd526" isInstrument="0" fileTime="18bc3261889" infoUpdateTime="18bc326cea7"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e950e009"/>
-    <STATE>191.VMjLgXK....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9XCLt3hKt3hKt3hKt3hYRUUSTEETIckVwTjQisVTTgkdEYjKAQjYPQSPWgUdMcjKAQjct3hdA4hKt3hKt3hKtnTUv.UQAslXuk0UXoWUFE0YQcEV77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
+    <STATE>903.VMjLg32....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9TSNy3BTEwlXmAiUYoWUrIVdA4hKAYmKTETRUAUSAAkKBolQY4BQtLTQHYEVzEkULUVVrI1ZEcjKwTjQgASUF4RPp4RPt3hKt3hKt3hdtPjKPUjZTEDLD4RPHAkVpEDTtvDUlg0YzXTV2cCLYc1ZrElKXcEVxU0UY4BQPIDQt3hKt3hKt3hKt3hKtTETRUDUS4BQl4xaQYjKAoGTAgVQrElZEk2U4cWLgYWUF4RLEYTXvTkQtDjZtDjKt3hKt3hKt3hKt3BTEoFUAACQtDDRPokZAAkKLQkYXcFMFk0c2TzXzDzUY4BVWgkbUcUVtPDTBQjKt3hKt3hKt3xJO4hKUAkTEQ0TtPjYt7VTF4RP1AUPnUDagoVR4cEaIcUV2EjYic1cVM1ZAAkKIAkKt3hKt3hKtnWZtDjKTETRUAUSAAkKBolQY4BQtLTQHYEVzEEaLU1XVg0azXjKwTjQgASUF4RPp4RPt3hKt3hKt3hKt3hKPUjZTEDLD4RPHAkVpEDTtzDUlg0YzXTV3cCLhIGNFI1ZAY1XmcmUisVPP4RRP4hKt3hKt3hKt3hKt3BUAkTUP0TPP4hPpYTVtPjKCUDRVgEcQwFSkE0UjYWUF4RLEYTXvTkQtDjZtDjKt3hKt3hKtX2JC4BTEoFUAACQtDDRPokZAAkKLQkYXcFMFkUd2rVV3UkUh4BVWgkbUcUVtPDTBQjKt3hKt3hKH4TSP4hKUAkTEQ0TtPjYt7VTF4RP1AUPnUDagoVS4cUaEYkVzEjYic1cVM1ZAAkKIAkKt3hKt3hKt3hKt3hKTETRUAUSAAkKBolQY4BQPMTQHYEVzEULLUVSGEVcAcUVtf0UXIWUWkkKDAkPD4hKt3hKt3hKt3hKt3RUPIUQTMkKDYlKuEkQtDjcPEDZEwVXp0TdWo2ZGI1ZAY1XmcmUisVPP4RRP4hKt3hKt3hKtbyJt3hKt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVPP4RPHQEY1UTLhkWPP4RPL4hKi4hKt3hKt3hKtXlTU0DUQAURWoULEYzXqEEUXoWQFwyKIMzasA2atUlaz4COuX0TTMCTrU2Yo41TzEFck4C.</STATE>
     <LAYOUT>
       <INPUTS>
         <BUS index="0" layout="L R"/>
@@ -82,7 +82,7 @@
           uiLastX_Normal="30" uiLastY_Normal="221" uiopen_Normal="1">
     <PLUGIN name="AudioFilePlayer" format="VST3" category="Fx" manufacturer="Matkat Music LLC"
             version="1.0.0" file="C:\Users\natha\OneDrive\Documents\Code\AudioFilePlayer\Builds\VisualStudio2022\x64\Debug\VST3\AudioFilePlayer.vst3"
-            uniqueId="79fe81c" isInstrument="0" fileTime="18b6601f0a4" infoUpdateTime="18bb9bde328"
+            uniqueId="79fe81c" isInstrument="0" fileTime="18b6601f0a4" infoUpdateTime="18bc326cea7"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95d02c7"/>
     <STATE>358.VMjLgzU....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9DCNz3BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQtfUQLolShUELhsVRxHlXzXEV5clUXIVT5ElLzXTX0UjQYk2cvXUVQsFSyEjLLQmZrEFa3X0UlomPHIUUTAETUoFUlomPHITQpQkTqoGTAEEUQYlbUMUczDiX5UEahkVQFMlYHUUVxUkUXkWUVckYlIES3YVdZgVPxH1ayHUX10zPt3hKt3hKt3hKt3hKtnTUv.UQAslXuk0UXoWUFE0YQcEVtPDTtHzZGI1YMIiXtPDTtLjKPcjKt3hKt3hKt3haTU0PUQDU3sFaicVTWkEQEYzXmEDOujzPu0Fbu4VYtQmO77hUSQ0LPwVcmklaSQWXzUlO..</STATE>
