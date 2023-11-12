@@ -177,8 +177,8 @@ bool ParametricEQ2AudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* ParametricEQ2AudioProcessor::createEditor()
 {
-	//return new ParametricEQ2AudioProcessorEditor(*this);
-	return new juce::GenericAudioProcessorEditor(*this);
+	return new ParametricEQ2AudioProcessorEditor(*this);
+	//return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
