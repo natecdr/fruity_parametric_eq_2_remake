@@ -53,10 +53,9 @@ using Coefficients = Filter::CoefficientsPtr;
 void updateCoefficients(Coefficients& old, const Coefficients& replacement);
 
 template<int Index, typename ChainType>
-void updateBand(const ChainSettings& chainSettings, ChainType& leftChain, ChainType& rightChain, double sampleRate)
+void updateBand(const ChainSettings& chainSettings, ChainType& chain, double sampleRate)
 {
-	auto& leftChainBand = leftChain.get<Index>();
-	auto& rightChainBand = rightChain.get<Index>();
+	auto& chainBand = chain.get<Index>();
 
 	auto bandSettings = chainSettings.bandSettings[Index];
 
@@ -66,24 +65,21 @@ void updateBand(const ChainSettings& chainSettings, ChainType& leftChain, ChainT
 	{
 		auto lowpass_coefficients = makeLowPassFilter(bandSettings, sampleRate);
 
-		updateLowHighPassFilter(leftChainBand, lowpass_coefficients, bandSettings.band_slope);
-		updateLowHighPassFilter(rightChainBand, lowpass_coefficients, bandSettings.band_slope);
+		updateLowHighPassFilter(chainBand, lowpass_coefficients, bandSettings.band_slope);
 		break;
 	}
 	case BandType::Peak:
 	{
 		auto peak_coefficients = makePeakFilter(bandSettings, sampleRate);
 
-		updatePeakFilter(leftChainBand, peak_coefficients);
-		updatePeakFilter(rightChainBand, peak_coefficients);
+		updatePeakFilter(chainBand, peak_coefficients);
 		break;
 	}
 	case BandType::HighPass:
 	{
 		auto highpass_coefficients = makeHighPassFilter(bandSettings, sampleRate);
 
-		updateLowHighPassFilter(leftChainBand, highpass_coefficients, bandSettings.band_slope);
-		updateLowHighPassFilter(rightChainBand, highpass_coefficients, bandSettings.band_slope);
+		updateLowHighPassFilter(chainBand, highpass_coefficients, bandSettings.band_slope);
 		break;
 	}
 	}

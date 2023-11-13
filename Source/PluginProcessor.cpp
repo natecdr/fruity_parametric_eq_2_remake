@@ -207,9 +207,14 @@ void ParametricEQ2AudioProcessor::updateFilters()
 {
 	auto chainSettings = getChainSettings(apvts);
 
-	updateBand<0>(chainSettings, leftChain, rightChain, getSampleRate());
-	updateBand<1>(chainSettings, leftChain, rightChain, getSampleRate());
-	updateBand<2>(chainSettings, leftChain, rightChain, getSampleRate());
+	updateBand<0>(chainSettings, leftChain, getSampleRate());
+	updateBand<0>(chainSettings, rightChain, getSampleRate());
+
+	updateBand<1>(chainSettings, leftChain, getSampleRate());
+	updateBand<1>(chainSettings, rightChain, getSampleRate());
+
+	updateBand<2>(chainSettings, leftChain, getSampleRate());
+	updateBand<2>(chainSettings, rightChain, getSampleRate());
 }
 
 void updateCoefficients(Coefficients& old, const Coefficients& replacement)

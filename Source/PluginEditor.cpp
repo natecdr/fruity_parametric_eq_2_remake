@@ -77,9 +77,9 @@ void ParametricEQ2AudioProcessorEditor::paint(juce::Graphics& g)
 
 		auto freq = mapToLog10(double(i) / double(width), 20.0, 20000.0);
 
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<0>(), 1000.0, sampleRate);
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<1>(), 1000.0, sampleRate);
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<2>(), 1000.0, sampleRate);
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<0>(), freq, sampleRate);
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<1>(), freq, sampleRate);
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<2>(), freq, sampleRate);
 
 		magnitudes[i] = Decibels::gainToDecibels(magnitude);
 	}
@@ -153,7 +153,12 @@ void ParametricEQ2AudioProcessorEditor::timerCallback()
 {
 	if (parametersChanged.compareAndSetBool(false, true))
 	{
-		DBG("cacz");
+		auto chainSettings = getChainSettings(audioProcessor.apvts);
+		updateBand<0>(chainSettings, monoChain, audioProcessor.getSampleRate());
+		updateBand<1>(chainSettings, monoChain, audioProcessor.getSampleRate());
+		updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
+
+		repaint();
 	}
 }
 
