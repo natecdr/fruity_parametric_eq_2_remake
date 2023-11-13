@@ -34,12 +34,25 @@ ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricE
 	{
 		addAndMakeVisible(component);
 	}
+
+	const auto& params = audioProcessor.getParameters();
+	for (auto param : params)
+	{
+		param->addListener(this);
+	}
+
+	startTimer(60);
 	
 	setSize(600, 300);
 }
 
 ParametricEQ2AudioProcessorEditor::~ParametricEQ2AudioProcessorEditor()
 {
+	const auto& params = audioProcessor.getParameters();
+	for (auto param : params)
+	{
+		param->removeListener(this);
+	}
 }
 
 //==============================================================================
@@ -133,12 +146,15 @@ void ParametricEQ2AudioProcessorEditor::resized()
 
 void ParametricEQ2AudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
 {
-
+	parametersChanged.set(true);
 }
 
 void ParametricEQ2AudioProcessorEditor::timerCallback()
 {
-
+	if (parametersChanged.compareAndSetBool(false, true))
+	{
+		DBG("cacz");
+	}
 }
 
 std::vector<juce::Component*> ParametricEQ2AudioProcessorEditor::getComponents()
