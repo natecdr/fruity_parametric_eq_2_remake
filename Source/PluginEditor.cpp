@@ -45,12 +45,53 @@ ParametricEQ2AudioProcessorEditor::~ParametricEQ2AudioProcessorEditor()
 //==============================================================================
 void ParametricEQ2AudioProcessorEditor::paint(juce::Graphics& g)
 {
+	using namespace juce;
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
-	g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+	g.fillAll(juce::Colours::black);
 
-	g.setColour(juce::Colours::white);
-	g.setFont(15.0f);
-	g.fillRect(getLocalBounds());
+	auto bounds = getLocalBounds();
+	auto responseArea = bounds.removeFromLeft(bounds.getWidth() * 0.66);
+	responseArea.reduce(10, 10);
+
+	auto sampleRate = audioProcessor.getSampleRate();
+	auto width = responseArea.getWidth();
+
+	std::vector<double> magnitudes;
+	magnitudes.resize(width);
+
+	for (int i = 0; i < width; ++i) {
+		double magnitude = 1.f;
+
+		auto freq = mapToLog10(double(i) / double(width), 20.0, 20000.0);
+
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<0>(), 1000.0, sampleRate);
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<1>(), 1000.0, sampleRate);
+		magnitude *= getBandMagnitudeForFrequency(monoChain.get<2>(), 1000.0, sampleRate);
+
+		magnitudes[i] = Decibels::gainToDecibels(magnitude);
+	}
+
+	Path responseCurve;
+
+	const double outputMin = responseArea.getBottom();
+	const double outputMax = responseArea.getY();
+	auto map = [outputMin, outputMax](double input)
+		{
+			return jmap(input, -24.0, 24.0, outputMin, outputMax);
+		};
+
+	responseCurve.startNewSubPath(responseArea.getX(), map(magnitudes.front()));
+
+	for (size_t i = 1; i < magnitudes.size(); ++i)
+	{
+		responseCurve.lineTo(responseArea.getX() + i, map(magnitudes[i]));
+	}
+
+	g.setColour(Colours::grey);
+	g.drawRect(responseArea.toFloat(), 1.f);
+
+	g.setColour(Colours::white);
+	g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
 void ParametricEQ2AudioProcessorEditor::resized()
@@ -88,6 +129,16 @@ void ParametricEQ2AudioProcessorEditor::resized()
 	band1SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth() * 0.33));
 	band2SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth() * 0.5));
 	band3SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth()));
+}
+
+void ParametricEQ2AudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
+{
+
+}
+
+void ParametricEQ2AudioProcessorEditor::timerCallback()
+{
+
 }
 
 std::vector<juce::Component*> ParametricEQ2AudioProcessorEditor::getComponents()

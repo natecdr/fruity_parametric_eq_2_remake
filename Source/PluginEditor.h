@@ -47,10 +47,29 @@ struct CustomChoiceSlider : juce::Slider
 	}
 };
 
+template<typename BandType>
+double getBandMagnitudeForFrequency(BandType& band, double freq, double sampleRate)
+{
+	double magnitude = 1.f;
+
+	if (!band.isBypassed<0>())
+		{magnitude *= band.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);}
+	if (!band.isBypassed<1>())
+		magnitude *= band.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+	if (!band.isBypassed<2>())
+		magnitude *= band.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+	if (!band.isBypassed<3>())
+		magnitude *= band.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+	return magnitude;
+}
+
 //==============================================================================
 /**
 */
-class ParametricEQ2AudioProcessorEditor : public juce::AudioProcessorEditor
+class ParametricEQ2AudioProcessorEditor : public juce::AudioProcessorEditor,
+	juce::AudioProcessorParameter::Listener,
+	juce::Timer
 {
 public:
 	ParametricEQ2AudioProcessorEditor(ParametricEQ2AudioProcessor&);
@@ -60,10 +79,16 @@ public:
 	void paint(juce::Graphics&) override;
 	void resized() override;
 
+	void parameterValueChanged(int parameterIndex, float newValue);
+	void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override {}
+	void timerCallback() override;
+
 private:
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
 	ParametricEQ2AudioProcessor& audioProcessor;
+
+	juce::Atomic<bool> parametersChanged{ false };
 
 	CustomVerticalSlider band1GainVerticalSlider, band2GainVerticalSlider, band3GainVerticalSlider;
 
@@ -83,6 +108,8 @@ private:
 	Attachment band1TypeChoiceSliderAttachment, band2TypeChoiceSliderAttachment, band3TypeChoiceSliderAttachment;
 
 	std::vector<juce::Component*> getComponents();
+
+	MonoChain monoChain;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametricEQ2AudioProcessorEditor)
 };
