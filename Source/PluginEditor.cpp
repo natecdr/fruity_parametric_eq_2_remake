@@ -57,8 +57,7 @@ void ParametricEQ2AudioProcessorEditor::resized()
 	auto bounds = getLocalBounds();
 
 	auto paramsArea = bounds.removeFromRight(bounds.getWidth() * 0.33);
-	auto responseArea = bounds;
-	responseArea.reduce(10, 10);
+	auto responseArea = bounds.reduced(10);
 
 	auto bottomParamsArea = paramsArea.removeFromBottom(paramsArea.getHeight() * 0.2);
 	auto topParamsArea = paramsArea.removeFromTop(paramsArea.getHeight() * 0.2);

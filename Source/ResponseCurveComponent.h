@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "BandThumbComponent.h"
 
 void drawCircleCenter(juce::Graphics& g, float x, float y, float radius);
 
@@ -38,5 +39,11 @@ private:
 
     juce::Atomic<bool> parametersChanged{ false };
     MonoChain monoChain;
+
+    BandThumbComponent thumbs[3] = {};
+    static constexpr float thumbSize = 30.f;
+
+    void updateResponseCurve();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResponseCurveComponent)
 };

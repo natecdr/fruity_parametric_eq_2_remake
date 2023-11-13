@@ -12,11 +12,6 @@
 #include "ResponseCurveComponent.h"
 #include "PluginEditor.h"
 
-void drawCircleCenter(juce::Graphics& g, float x, float y, float radius)
-{
-    g.fillEllipse(x - radius / 2, y - radius/2, radius, radius);
-}
-
 //==============================================================================
 ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) : audioProcessor(p)
 {
@@ -27,6 +22,12 @@ ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) :
     {
         param->addListener(this);
     }
+
+    for (size_t i = 0; i < sizeof(thumbs) / sizeof(thumbs[0]); ++i) {
+        addAndMakeVisible(thumbs[i]);
+    }
+
+    updateResponseCurve();
 
     startTimer(60);
 }
@@ -42,12 +43,6 @@ ResponseCurveComponent::~ResponseCurveComponent()
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
     using namespace juce;
 
     auto responseArea = getLocalBounds();
@@ -108,7 +103,11 @@ void ResponseCurveComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
+    auto bounds = getLocalBounds();
 
+    for (size_t i = 0; i < sizeof(thumbs) / sizeof(thumbs[0]); ++i) {
+        thumbs[i].setBounds((i + 1) * bounds.getWidth() / 4, bounds.getHeight() / 2 - thumbSize/2, thumbSize, thumbSize);
+    }
 }
 
 void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
@@ -120,11 +119,16 @@ void ResponseCurveComponent::timerCallback()
 {
     if (parametersChanged.compareAndSetBool(false, true))
     {
-        auto chainSettings = getChainSettings(audioProcessor.apvts);
-        updateBand<0>(chainSettings, monoChain, audioProcessor.getSampleRate());
-        updateBand<1>(chainSettings, monoChain, audioProcessor.getSampleRate());
-        updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
+        updateResponseCurve();
 
         repaint();
     }
+}
+
+void ResponseCurveComponent::updateResponseCurve()
+{
+    auto chainSettings = getChainSettings(audioProcessor.apvts);
+    updateBand<0>(chainSettings, monoChain, audioProcessor.getSampleRate());
+    updateBand<1>(chainSettings, monoChain, audioProcessor.getSampleRate());
+    updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
 }
