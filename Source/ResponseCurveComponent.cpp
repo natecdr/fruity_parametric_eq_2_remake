@@ -12,8 +12,10 @@
 #include "ResponseCurveComponent.h"
 #include "PluginEditor.h"
 
+
 //==============================================================================
-ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) : audioProcessor(p)
+ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) : audioProcessor(p),
+thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p, 2) } 
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -88,15 +90,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
-
-    for (int i = 0; i < 3; ++i) {
-        float freq = chainSettings.bandSettings[i].band_freq;
-
-        auto x = mapFromLog10((double)freq, 20.0, 20000.0) * width;
-
-        auto y = map(chainSettings.bandSettings[i].band_gain);
-        drawCircleCenter(g, x, y, 5.f);
-    }
 }
 
 void ResponseCurveComponent::resized()
@@ -120,6 +113,7 @@ void ResponseCurveComponent::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
+        updateThumbs();
 
         repaint();
     }
@@ -131,4 +125,29 @@ void ResponseCurveComponent::updateResponseCurve()
     updateBand<0>(chainSettings, monoChain, audioProcessor.getSampleRate());
     updateBand<1>(chainSettings, monoChain, audioProcessor.getSampleRate());
     updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
+}
+
+void ResponseCurveComponent::updateThumbs()
+{
+    using namespace juce;
+
+    auto chainSettings = getChainSettings(audioProcessor.apvts);
+    auto responseArea = getLocalBounds();
+    auto width = responseArea.getWidth();
+
+    const double outputMin = responseArea.getBottom();
+    const double outputMax = responseArea.getY();
+    auto map = [outputMin, outputMax](double input)
+        {
+            return jmap(input, -24.0, 24.0, outputMin, outputMax);
+        };
+
+    for (int i = 0; i < 3; ++i) {
+        float freq = chainSettings.bandSettings[i].band_freq;
+
+        auto x = mapFromLog10((double)freq, 20.0, 20000.0) * width;
+
+        auto y = map(chainSettings.bandSettings[i].band_gain);
+        thumbs[i].setPosition(x, y);
+    }
 }

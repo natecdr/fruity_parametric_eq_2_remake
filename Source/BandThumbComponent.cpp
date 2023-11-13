@@ -17,7 +17,9 @@ void drawCircleCenter(juce::Graphics& g, float x, float y, float radius)
 }
 
 //==============================================================================
-BandThumbComponent::BandThumbComponent()
+BandThumbComponent::BandThumbComponent(ParametricEQ2AudioProcessor& p, int index) : 
+    audioProcessor(p), 
+    bandIndex(index)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -49,8 +51,7 @@ void BandThumbComponent::resized()
 
     jassert(bounds.getHeight() == bounds.getWidth());
 
-    auto thumbSize = bounds.getHeight();
-    DBG(thumbSize);
+    thumbSize = bounds.getHeight();
 
     constrainer.setMinimumOnscreenAmounts(thumbSize, thumbSize, thumbSize, thumbSize);
 }
@@ -72,5 +73,8 @@ void BandThumbComponent::mouseUp(const juce::MouseEvent& event)
     setMouseCursor(juce::MouseCursor::NormalCursor);
 }
 
-
+void BandThumbComponent::setPosition(float xCenter, float yCenter)
+{
+    setBounds(xCenter - thumbSize / 2, yCenter - thumbSize / 2, thumbSize, thumbSize);
+}
 
