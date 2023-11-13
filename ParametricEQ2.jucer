@@ -12,6 +12,10 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="IMyimC" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
+    <FILE id="S1wUKs" name="ResponseCurveComponent.cpp" compile="1" resource="0"
+          file="Source/ResponseCurveComponent.cpp"/>
+    <FILE id="B3GMBo" name="ResponseCurveComponent.h" compile="0" resource="0"
+          file="Source/ResponseCurveComponent.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

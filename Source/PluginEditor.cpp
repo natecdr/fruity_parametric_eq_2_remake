@@ -12,6 +12,7 @@
 //==============================================================================
 ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricEQ2AudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p),
+	responseCurveComponent(audioProcessor),
 	band1GainVerticalSliderAttachment(audioProcessor.apvts, "band1_gain", band1GainVerticalSlider),
 	band2GainVerticalSliderAttachment(audioProcessor.apvts, "band2_gain", band2GainVerticalSlider),
 	band3GainVerticalSliderAttachment(audioProcessor.apvts, "band3_gain", band3GainVerticalSlider),
@@ -35,76 +36,19 @@ ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricE
 		addAndMakeVisible(component);
 	}
 
-	const auto& params = audioProcessor.getParameters();
-	for (auto param : params)
-	{
-		param->addListener(this);
-	}
-
-	startTimer(60);
-	
 	setSize(600, 300);
 }
 
 ParametricEQ2AudioProcessorEditor::~ParametricEQ2AudioProcessorEditor()
 {
-	const auto& params = audioProcessor.getParameters();
-	for (auto param : params)
-	{
-		param->removeListener(this);
-	}
+	
 }
 
 //==============================================================================
 void ParametricEQ2AudioProcessorEditor::paint(juce::Graphics& g)
 {
-	using namespace juce;
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
 	g.fillAll(juce::Colours::black);
-
-	auto bounds = getLocalBounds();
-	auto responseArea = bounds.removeFromLeft(bounds.getWidth() * 0.66);
-	responseArea.reduce(10, 10);
-
-	auto sampleRate = audioProcessor.getSampleRate();
-	auto width = responseArea.getWidth();
-
-	std::vector<double> magnitudes;
-	magnitudes.resize(width);
-
-	for (int i = 0; i < width; ++i) {
-		double magnitude = 1.f;
-
-		auto freq = mapToLog10(double(i) / double(width), 20.0, 20000.0);
-
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<0>(), freq, sampleRate);
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<1>(), freq, sampleRate);
-		magnitude *= getBandMagnitudeForFrequency(monoChain.get<2>(), freq, sampleRate);
-
-		magnitudes[i] = Decibels::gainToDecibels(magnitude);
-	}
-
-	Path responseCurve;
-
-	const double outputMin = responseArea.getBottom();
-	const double outputMax = responseArea.getY();
-	auto map = [outputMin, outputMax](double input)
-		{
-			return jmap(input, -24.0, 24.0, outputMin, outputMax);
-		};
-
-	responseCurve.startNewSubPath(responseArea.getX(), map(magnitudes.front()));
-
-	for (size_t i = 1; i < magnitudes.size(); ++i)
-	{
-		responseCurve.lineTo(responseArea.getX() + i, map(magnitudes[i]));
-	}
-
-	g.setColour(Colours::grey);
-	g.drawRect(responseArea.toFloat(), 1.f);
-
-	g.setColour(Colours::white);
-	g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
 void ParametricEQ2AudioProcessorEditor::resized()
@@ -113,6 +57,8 @@ void ParametricEQ2AudioProcessorEditor::resized()
 	auto bounds = getLocalBounds();
 
 	auto paramsArea = bounds.removeFromRight(bounds.getWidth() * 0.33);
+	auto responseArea = bounds;
+	responseArea.reduce(10, 10);
 
 	auto bottomParamsArea = paramsArea.removeFromBottom(paramsArea.getHeight() * 0.2);
 	auto topParamsArea = paramsArea.removeFromTop(paramsArea.getHeight() * 0.2);
@@ -142,24 +88,8 @@ void ParametricEQ2AudioProcessorEditor::resized()
 	band1SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth() * 0.33));
 	band2SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth() * 0.5));
 	band3SlopeChoiceSlider.setBounds(topParamsSlopeArea.removeFromLeft(topParamsSlopeArea.getWidth()));
-}
 
-void ParametricEQ2AudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
-	parametersChanged.set(true);
-}
-
-void ParametricEQ2AudioProcessorEditor::timerCallback()
-{
-	if (parametersChanged.compareAndSetBool(false, true))
-	{
-		auto chainSettings = getChainSettings(audioProcessor.apvts);
-		updateBand<0>(chainSettings, monoChain, audioProcessor.getSampleRate());
-		updateBand<1>(chainSettings, monoChain, audioProcessor.getSampleRate());
-		updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
-
-		repaint();
-	}
+	responseCurveComponent.setBounds(responseArea);
 }
 
 std::vector<juce::Component*> ParametricEQ2AudioProcessorEditor::getComponents()
@@ -185,5 +115,7 @@ std::vector<juce::Component*> ParametricEQ2AudioProcessorEditor::getComponents()
 		&band1TypeChoiceSlider,
 		&band2TypeChoiceSlider,
 		&band3TypeChoiceSlider,
+
+		&responseCurveComponent
 	};
 }
