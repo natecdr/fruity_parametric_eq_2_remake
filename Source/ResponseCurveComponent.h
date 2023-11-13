@@ -13,6 +13,8 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
+void drawCircleCenter(juce::Graphics& g, float x, float y, float radius);
+
 //==============================================================================
 /*
 */

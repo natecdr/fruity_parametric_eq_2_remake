@@ -12,6 +12,11 @@
 #include "ResponseCurveComponent.h"
 #include "PluginEditor.h"
 
+void drawCircleCenter(juce::Graphics& g, float x, float y, float radius)
+{
+    g.fillEllipse(x - radius / 2, y - radius/2, radius, radius);
+}
+
 //==============================================================================
 ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) : audioProcessor(p)
 {
@@ -46,8 +51,9 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     using namespace juce;
 
     auto responseArea = getLocalBounds();
-    //auto responseArea = bounds.removeFromLeft(bounds.getWidth() * 0.66);
-    ////responseArea.reduce(10, 10);
+
+    g.setColour(Colours::grey);
+    g.drawRect(responseArea.toFloat(), 1.f);
 
     auto sampleRate = audioProcessor.getSampleRate();
     auto width = responseArea.getWidth();
@@ -67,6 +73,8 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         magnitudes[i] = Decibels::gainToDecibels(magnitude);
     }
 
+    auto chainSettings = getChainSettings(audioProcessor.apvts);
+
     Path responseCurve;
 
     const double outputMin = responseArea.getBottom();
@@ -83,11 +91,17 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(magnitudes[i]));
     }
 
-    g.setColour(Colours::grey);
-    g.drawRect(responseArea.toFloat(), 1.f);
-
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
+
+    for (int i = 0; i < 3; ++i) {
+        float freq = chainSettings.bandSettings[i].band_freq;
+
+        auto x = mapFromLog10((double)freq, 20.0, 20000.0) * width;
+
+        auto y = map(chainSettings.bandSettings[i].band_gain);
+        drawCircleCenter(g, x, y, 5.f);
+    }
 }
 
 void ResponseCurveComponent::resized()
