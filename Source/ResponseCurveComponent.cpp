@@ -32,7 +32,7 @@ thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p
     updateResponseCurve();
     updateThumbsFromParameters();
 
-    startTimer(60);
+    startTimer(30);
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
@@ -114,7 +114,7 @@ void ResponseCurveComponent::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
-        //updateThumbsFromParameters();
+        updateThumbsFromParameters();
 
         repaint();
     }
