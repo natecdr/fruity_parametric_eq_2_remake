@@ -234,6 +234,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 
 	for (int i = 0; i < sizeof(settings.bandSettings) / sizeof(settings.bandSettings[0]); ++i) {
 		settings.bandSettings[i].band_freq = apvts.getRawParameterValue(getParameterId(i + 1, "freq"))->load();
+		DBG(apvts.getParameter(getParameterId(1, "freq"))->getValue());
 		settings.bandSettings[i].band_gain = apvts.getRawParameterValue(getParameterId(i + 1, "gain"))->load();
 		settings.bandSettings[i].band_slope = static_cast<Slope>(apvts.getRawParameterValue(getParameterId(i + 1, "slope"))->load());
 		settings.bandSettings[i].band_type = static_cast<BandType>(apvts.getRawParameterValue(getParameterId(i + 1, "type"))->load());

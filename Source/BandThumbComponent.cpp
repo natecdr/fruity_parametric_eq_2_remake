@@ -53,19 +53,35 @@ void BandThumbComponent::resized()
 
     thumbSize = bounds.getHeight();
 
-    constrainer.setMinimumOnscreenAmounts(thumbSize, thumbSize, thumbSize, thumbSize);
+    constrainer.setMinimumOnscreenAmounts(thumbSize/2, thumbSize/2, thumbSize/2, thumbSize/2);
 }
 
 void BandThumbComponent::mouseDown(const juce::MouseEvent& event)
 {
     dragger.startDraggingComponent(this, event);
     setMouseCursor(juce::MouseCursor::NoCursor);
-    
 }
 
 void BandThumbComponent::mouseDrag(const juce::MouseEvent& event)
 {
+    using namespace juce;
+
     dragger.dragComponent(this, event, &constrainer);
+
+    auto freqParam = audioProcessor.apvts.getParameter(getParameterId(bandIndex + 1, "freq"));
+    auto gainParam = audioProcessor.apvts.getParameter(getParameterId(bandIndex + 1, "gain"));
+
+    auto parentBounds = getParentComponent()->getLocalBounds();
+
+    auto newFreq = getCenterPosition().getX() / parentBounds.getWidth();
+
+    auto newGain = 1 - getCenterPosition().getY() / parentBounds.getHeight();
+
+    freqParam->setValueNotifyingHost(newFreqSkewed);
+    gainParam->setValueNotifyingHost(newGain);
+
+    DBG(getCenterPosition().getX() / parentBounds.getWidth());
+
 }
 
 void BandThumbComponent::mouseUp(const juce::MouseEvent& event)
@@ -78,3 +94,7 @@ void BandThumbComponent::setPosition(float xCenter, float yCenter)
     setBounds(xCenter - thumbSize / 2, yCenter - thumbSize / 2, thumbSize, thumbSize);
 }
 
+juce::Point<float> BandThumbComponent::getCenterPosition()
+{
+    return juce::Point<float>(getX() + thumbSize / 2, getY() + thumbSize/2);
+}

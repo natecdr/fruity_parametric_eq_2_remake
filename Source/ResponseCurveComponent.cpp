@@ -30,6 +30,7 @@ thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p
     }
 
     updateResponseCurve();
+    updateThumbsFromParameters();
 
     startTimer(60);
 }
@@ -113,7 +114,7 @@ void ResponseCurveComponent::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
-        updateThumbs();
+        updateThumbsFromParameters();
 
         repaint();
     }
@@ -127,7 +128,7 @@ void ResponseCurveComponent::updateResponseCurve()
     updateBand<2>(chainSettings, monoChain, audioProcessor.getSampleRate());
 }
 
-void ResponseCurveComponent::updateThumbs()
+void ResponseCurveComponent::updateThumbsFromParameters()
 {
     using namespace juce;
 

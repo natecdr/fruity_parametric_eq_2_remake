@@ -31,6 +31,7 @@ ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricE
 {
 	// Make sure that before the constructor has finished, you've set the
 	// editor's size to whatever you need it to be.
+
 	for (auto* component : getComponents())
 	{
 		addAndMakeVisible(component);

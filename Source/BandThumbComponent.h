@@ -29,6 +29,7 @@ public:
     void mouseUp(const juce::MouseEvent& event) override;
     void setPosition(float xCenter, float yCenter);
     void updatePosition();
+    juce::Point<float> getCenterPosition();
 
 private:
     ParametricEQ2AudioProcessor& audioProcessor;

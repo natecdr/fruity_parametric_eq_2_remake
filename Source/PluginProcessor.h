@@ -152,6 +152,7 @@ inline auto makeHighPassFilter(const BandSettings& bandSettings, double sampleRa
 	);
 }
 
+juce::String getParameterId(int bandNumber, juce::String bandParameter);
 
 class ParametricEQ2AudioProcessor : public juce::AudioProcessor
 #if JucePlugin_Enable_ARA
@@ -203,9 +204,6 @@ private:
 	MonoChain leftChain, rightChain;
 
 	void updateFilters();
-
-	juce::StringRef getParameterId(int bandNumber, juce::StringRef bandParameter);
-
 	//==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametricEQ2AudioProcessor)
 };
