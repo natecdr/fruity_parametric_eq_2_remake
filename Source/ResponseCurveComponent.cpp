@@ -114,7 +114,7 @@ void ResponseCurveComponent::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
-        updateThumbsFromParameters();
+        //updateThumbsFromParameters();
 
         repaint();
     }

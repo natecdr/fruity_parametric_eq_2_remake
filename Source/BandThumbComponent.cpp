@@ -72,17 +72,18 @@ void BandThumbComponent::mouseDrag(const juce::MouseEvent& event)
     auto gainParam = audioProcessor.apvts.getParameter(getParameterId(bandIndex + 1, "gain"));
 
     auto parentBounds = getParentComponent()->getLocalBounds();
+    auto parentWidth = parentBounds.getWidth();
 
-    auto newFreq = getCenterPosition().getX() / parentBounds.getWidth();
+    auto x = getCenterPosition().getX();
+    auto freqAtX = mapToLog10(x / parentWidth, 20.f, 20000.f);
+    auto newFreqParam = freqParam->convertTo0to1(freqAtX);
 
     auto newGain = 1 - getCenterPosition().getY() / parentBounds.getHeight();
 
-    freqParam->setValueNotifyingHost(newFreqSkewed);
+    freqParam->setValueNotifyingHost(newFreqParam);
     gainParam->setValueNotifyingHost(newGain);
-
-    DBG(getCenterPosition().getX() / parentBounds.getWidth());
-
 }
+
 
 void BandThumbComponent::mouseUp(const juce::MouseEvent& event)
 {
