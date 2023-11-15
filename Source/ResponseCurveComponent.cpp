@@ -46,12 +46,50 @@ ResponseCurveComponent::~ResponseCurveComponent()
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
 {
+    auto responseArea = getLocalBounds();
+
+    g.setColour(juce::Colours::grey);
+    g.drawRect(responseArea.toFloat(), 1.f);
+
+    drawResponseCurve(g);
+}
+
+void ResponseCurveComponent::resized()
+{
+    // This method is where you should set the bounds of any child
+    // components that your component contains..
+    auto bounds = getLocalBounds();
+
+    auto chainSettings = getChainSettings(audioProcessor.apvts);
+    for (size_t i = 0; i < sizeof(thumbs) / sizeof(thumbs[0]); ++i) {
+        auto freq = chainSettings.bandSettings[i].band_freq;
+        auto x = juce::mapFromLog10((double)freq, 20.0, 20000.0) * bounds.getWidth();
+
+        thumbs[i].setBounds(x, bounds.getHeight() / 2 - thumbSize/2, thumbSize, thumbSize);
+    }
+}
+
+void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    if (parametersChanged.compareAndSetBool(false, true))
+    {
+        updateResponseCurve();
+        updateThumbsFromParameters();
+
+        repaint();
+    }
+}
+
+void ResponseCurveComponent::drawResponseCurve(juce::Graphics& g)
+{
     using namespace juce;
 
     auto responseArea = getLocalBounds();
-
-    g.setColour(Colours::grey);
-    g.drawRect(responseArea.toFloat(), 1.f);
 
     auto sampleRate = audioProcessor.getSampleRate();
     auto width = responseArea.getWidth();
@@ -71,8 +109,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         magnitudes[i] = Decibels::gainToDecibels(magnitude);
     }
 
-    auto chainSettings = getChainSettings(audioProcessor.apvts);
-
     Path responseCurve;
 
     const double outputMin = responseArea.getBottom();
@@ -91,33 +127,6 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
-}
-
-void ResponseCurveComponent::resized()
-{
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
-    auto bounds = getLocalBounds();
-
-    for (size_t i = 0; i < sizeof(thumbs) / sizeof(thumbs[0]); ++i) {
-        thumbs[i].setBounds((i + 1) * bounds.getWidth() / 4, bounds.getHeight() / 2 - thumbSize/2, thumbSize, thumbSize);
-    }
-}
-
-void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
-{
-    parametersChanged.set(true);
-}
-
-void ResponseCurveComponent::timerCallback()
-{
-    if (parametersChanged.compareAndSetBool(false, true))
-    {
-        updateResponseCurve();
-        updateThumbsFromParameters();
-
-        repaint();
-    }
 }
 
 void ResponseCurveComponent::updateResponseCurve()
@@ -147,8 +156,8 @@ void ResponseCurveComponent::updateThumbsFromParameters()
         float freq = chainSettings.bandSettings[i].band_freq;
 
         auto x = mapFromLog10((double)freq, 20.0, 20000.0) * width;
-
         auto y = map(chainSettings.bandSettings[i].band_gain);
+
         thumbs[i].setPosition(x, y);
     }
 }
