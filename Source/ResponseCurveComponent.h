@@ -45,7 +45,7 @@ private:
 
     void updateResponseCurve();
     void updateThumbsFromParameters();
-    void drawResponseCurve(juce::Graphics& g);
+    void drawResultingResponseCurve(juce::Graphics& g);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResponseCurveComponent)
 };

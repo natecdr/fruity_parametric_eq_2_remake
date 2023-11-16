@@ -31,15 +31,9 @@ BandThumbComponent::~BandThumbComponent()
 
 void BandThumbComponent::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
     auto bounds = getLocalBounds();
 
-    g.setColour(juce::Colours::yellow );
+    g.setColour(col);
     g.fillEllipse(bounds.toFloat());
 }
 
@@ -98,4 +92,9 @@ void BandThumbComponent::setPosition(float xCenter, float yCenter)
 juce::Point<float> BandThumbComponent::getCenterPosition()
 {
     return juce::Point<float>(getX() + thumbSize / 2, getY() + thumbSize/2);
+}
+
+void BandThumbComponent::setColour(juce::Colour colour)
+{
+    col = colour;
 }

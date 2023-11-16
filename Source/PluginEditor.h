@@ -65,6 +65,8 @@ double getBandMagnitudeForFrequency(BandType& band, double freq, double sampleRa
 	return magnitude;
 }
 
+juce::Colour* getColourScheme();
+
 //==============================================================================
 /**
 */

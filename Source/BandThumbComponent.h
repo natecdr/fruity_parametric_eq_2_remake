@@ -29,6 +29,7 @@ public:
     void mouseUp(const juce::MouseEvent& event) override;
     void setPosition(float xCenter, float yCenter);
     void updatePosition();
+    void setColour(juce::Colour col);
     juce::Point<float> getCenterPosition();
 
 private:
@@ -37,8 +38,10 @@ private:
     juce::ComponentDragger dragger;
     juce::ComponentBoundsConstrainer constrainer;
 
-    int bandIndex;
+    const int bandIndex;
     float thumbSize;
+
+    juce::Colour col;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BandThumbComponent)
 };

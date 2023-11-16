@@ -51,7 +51,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.setColour(juce::Colours::grey);
     g.drawRect(responseArea.toFloat(), 1.f);
 
-    drawResponseCurve(g);
+    drawResultingResponseCurve(g);
 }
 
 void ResponseCurveComponent::resized()
@@ -65,7 +65,8 @@ void ResponseCurveComponent::resized()
         auto freq = chainSettings.bandSettings[i].band_freq;
         auto x = juce::mapFromLog10((double)freq, 20.0, 20000.0) * bounds.getWidth();
 
-        thumbs[i].setBounds(x, bounds.getHeight() / 2 - thumbSize/2, thumbSize, thumbSize);
+        thumbs[i].setBounds(x - thumbSize/2, bounds.getHeight() / 2 - thumbSize/2, thumbSize, thumbSize);
+        thumbs[i].setColour(getColourScheme()[i]);
     }
 }
 
@@ -85,7 +86,7 @@ void ResponseCurveComponent::timerCallback()
     }
 }
 
-void ResponseCurveComponent::drawResponseCurve(juce::Graphics& g)
+void ResponseCurveComponent::drawResultingResponseCurve(juce::Graphics& g)
 {
     using namespace juce;
 

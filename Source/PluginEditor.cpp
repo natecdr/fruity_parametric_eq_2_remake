@@ -9,6 +9,17 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+juce::Colour* getColourScheme()
+{
+	juce::Colour colourScheme[3] = {
+		juce::Colours::purple,
+		juce::Colours::pink,
+		juce::Colours::orange
+	};
+
+	return colourScheme;
+}
+
 //==============================================================================
 ParametricEQ2AudioProcessorEditor::ParametricEQ2AudioProcessorEditor(ParametricEQ2AudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p),
