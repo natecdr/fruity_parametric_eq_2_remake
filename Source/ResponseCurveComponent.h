@@ -21,9 +21,11 @@ void drawCircleCenter(juce::Graphics& g, float x, float y, float radius);
 */
 enum FFTOrder
 {
-	order2048 = 11,
-	order4096 = 12,
-	order8192 = 13
+	order2k = 11,
+	order4k = 12,
+	order8k = 13,
+	order16k = 14,
+	order32k = 15
 };
 
 template<typename BlockType>
@@ -86,69 +88,6 @@ private:
 	Fifo<BlockType> fftDataFifo;
 };
 
-//template<typename PathType>
-//struct AnalyzerPathGenerator
-//{
-//	void generatePath(const std::vector<float>& renderData,
-//		juce::Rectangle<float> fftBounds,
-//		int fftSize,
-//		float binWidth,
-//		float negativeInfinity)
-//	{
-//		auto top = fftBounds.getY();
-//		auto bottom = fftBounds.getBottom();
-//		auto width = fftBounds.getWidth();
-//
-//		int numBins = (int)fftSize / 2;
-//
-//		PathType p;
-//		p.preallocateSpace(3 * (int)fftBounds.getWidth());
-//
-//		auto map = [bottom, top, negativeInfinity](float v)
-//			{
-//				return juce::jmap(v,
-//					negativeInfinity, 0.f,
-//					float(bottom), top);
-//			};
-//
-//		auto y = map(renderData[0]);
-//
-//		jassert(!std::isnan(y) && !std::isinf(y));
-//
-//		p.startNewSubPath(0, y);
-//
-//		const int pathResolution = 2;
-//
-//		for (int binNum = 1; binNum < numBins; binNum += pathResolution)
-//		{
-//			y = map(renderData[binNum]);
-//			jassert(!std::isnan(y) && !std::isinf(y));
-//
-//			if (!std::isnan(y) && !std::isinf(y))
-//			{
-//				auto binFreq = binNum * binWidth;
-//				auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
-//				int binX = std::floor(normalizedBinX * width);
-//				p.lineTo(binX, y);
-//			}
-//		}
-//
-//		pathFifo.push(p);
-//	}
-//
-//	int getNumPathsAvailable() const
-//	{
-//		return pathFifo.getNumAvailableForReading();
-//	}
-//
-//	bool getPath(PathType& path)
-//	{
-//		return pathFifo.pull(path);
-//	}
-//private:
-//	Fifo<PathType> pathFifo;
-//};
-
 class ResponseCurveComponent  : public juce::Component,
     juce::AudioProcessorParameter::Listener,
     juce::Timer
@@ -184,6 +123,7 @@ private:
 	FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
 
 	//AnalyzerPathGenerator<juce::Path> pathProducer;
+
 
 	juce::Path leftChannelFFTPath;
 

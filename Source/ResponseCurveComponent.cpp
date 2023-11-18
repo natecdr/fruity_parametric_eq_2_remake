@@ -33,10 +33,10 @@ leftChannelFifo(&audioProcessor.leftChannelFifo)
     updateResponseCurve();
     updateThumbsFromParameters();
 
-    leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+    leftChannelFFTDataGenerator.changeOrder(FFTOrder::order8k);
     monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 
-    startTimer(60);
+    startTimer(30);
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
@@ -52,13 +52,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 {
     auto responseArea = getLocalBounds();
 
-    g.setColour(juce::Colours::grey);
-    g.drawRect(responseArea.toFloat(), 1.f);
-
-    drawResultingResponseCurve(g);
-
     //FFT lines
-    const auto fftBounds = getLocalBounds().toFloat();
     const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
 
     const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
@@ -77,6 +71,10 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         }
     }
 
+    drawResultingResponseCurve(g);
+
+    g.setColour(juce::Colours::grey);
+    g.drawRect(responseArea.toFloat(), 1.f);
 }
 
 void ResponseCurveComponent::resized()
@@ -121,34 +119,6 @@ void ResponseCurveComponent::timerCallback()
         }
     }
 
-    //if there are FFR data buffers to pull
-    // if we can pull a buffer
-    //  generate a path
-
-    //const auto fftBounds = getLocalBounds().toFloat();
-    //const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
-
-    //const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
-
-    //while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) //Do we have more than 0 fft blocks available
-    //{
-    //    std::vector<float> fftData; //Will contain fft data if we are able to pull a fft block
-
-    //    if (leftChannelFFTDataGenerator.getFFTData(fftData)) //Try to pull a fft block
-    //    {
-    //        pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
-    //    }
-    //}
-
-    //While there are path that can be pulled
-    // pull as pany as we can
-    //  display the most recent one
-
-    //while (pathProducer.getNumPathsAvailable())
-    //{
-    //    pathProducer.getPath(leftChannelFFTPath);
-    //}
-
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
@@ -192,15 +162,22 @@ void ResponseCurveComponent::drawResultingResponseCurve(juce::Graphics& g)
             return jmap(input, -24.0, 24.0, outputMin, outputMax);
         };
 
-    responseCurve.startNewSubPath(responseArea.getX(), map(magnitudes.front()));
+    responseCurve.startNewSubPath(0, responseArea.getBottom());
+    responseCurve.lineTo(responseArea.getX(), map(magnitudes.front()));
 
     for (size_t i = 1; i < magnitudes.size(); ++i)
     {
         responseCurve.lineTo(responseArea.getX() + i, map(magnitudes[i]));
     }
 
+    responseCurve.lineTo(responseArea.getRight(), responseArea.getBottom());
+    responseCurve.closeSubPath();
+
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
+
+    g.setColour(Colour::fromFloatRGBA(1, 1, 1, 0.1));
+    g.fillPath(responseCurve);
 }
 
 void ResponseCurveComponent::updateResponseCurve()
@@ -260,7 +237,9 @@ void ResponseCurveComponent::drawFFTLines(juce::Graphics& g,
 
     jassert(!std::isnan(y) && !std::isinf(y));
 
-    const int pathResolution = 2;
+    const int pathResolution = 1;
+
+    int lastPixelDrawnX = 0;
 
     for (int binNum = 1; binNum < numBins; binNum += pathResolution)
     {
@@ -273,10 +252,16 @@ void ResponseCurveComponent::drawFFTLines(juce::Graphics& g,
             auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
             int binX = std::floor(normalizedBinX * width);
 
-            float alpha = (y) / getHeight();
-            DBG(getHeight());
-            g.setColour(juce::Colour::fromFloatRGBA(1.f, 0, 0, 1 - alpha));
-            g.drawLine(binX, top, binX, bottom, 1.f);
+
+            if (std::round(binX) > lastPixelDrawnX)
+            {
+                float alpha = (y) / getHeight();
+
+                g.setColour(juce::Colour::fromFloatRGBA(1.f, 0, 0, 1 - alpha));
+                g.drawVerticalLine(binX, top, bottom);
+
+                lastPixelDrawnX = std::round(binX);
+            }
         }
     }
 }
