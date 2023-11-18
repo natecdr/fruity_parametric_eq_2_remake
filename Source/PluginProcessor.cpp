@@ -105,6 +105,11 @@ void ParametricEQ2AudioProcessor::prepareToPlay(double sampleRate, int samplesPe
 	rightChain.prepare(spec);
 
 	auto chainSettings = getChainSettings(apvts);
+
+	updateFilters();
+
+	leftChannelFifo.prepare(samplesPerBlock);
+	rightChannelFifo.prepare(samplesPerBlock);
 }
 
 void ParametricEQ2AudioProcessor::releaseResources()
@@ -167,6 +172,9 @@ void ParametricEQ2AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
 	leftChain.process(leftContext);
 	rightChain.process(rightContext);
+
+	leftChannelFifo.update(buffer);
+	leftChannelFifo.update(buffer);
 }
 
 //==============================================================================

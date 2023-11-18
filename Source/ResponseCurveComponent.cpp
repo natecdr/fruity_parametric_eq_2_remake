@@ -15,7 +15,8 @@
 
 //==============================================================================
 ResponseCurveComponent::ResponseCurveComponent(ParametricEQ2AudioProcessor& p) : audioProcessor(p),
-thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p, 2) } 
+thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p, 2) },
+leftChannelFifo(&audioProcessor.leftChannelFifo)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -32,7 +33,10 @@ thumbs{ BandThumbComponent(p, 0), BandThumbComponent(p, 1), BandThumbComponent(p
     updateResponseCurve();
     updateThumbsFromParameters();
 
-    startTimer(30);
+    leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+    monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
+
+    startTimer(60);
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
@@ -52,6 +56,27 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.drawRect(responseArea.toFloat(), 1.f);
 
     drawResultingResponseCurve(g);
+
+    //FFT lines
+    const auto fftBounds = getLocalBounds().toFloat();
+    const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+
+    const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+
+    bool drawn = false;
+
+    while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) //Do we have more than 0 fft blocks available
+    {
+        std::vector<float> fftData; //Will contain fft data if we are able to pull a fft block
+
+        if (leftChannelFFTDataGenerator.getFFTData(fftData)) //Try to pull a fft block
+        {
+            if (!drawn)
+                drawFFTLines(g, fftData, fftSize, binWidth, -48.f);
+            drawn = true;
+        }
+    }
+
 }
 
 void ResponseCurveComponent::resized()
@@ -77,13 +102,61 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 
 void ResponseCurveComponent::timerCallback()
 {
+    juce::AudioBuffer<float> tempIncomingBuffer;
+
+    while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
+    {
+        if (leftChannelFifo->getAudioBuffer(tempIncomingBuffer));
+        {
+            auto size = tempIncomingBuffer.getNumSamples();
+            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
+                monoBuffer.getReadPointer(0, size),
+                monoBuffer.getNumSamples() - size);
+
+            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+                tempIncomingBuffer.getReadPointer(0, 0),
+                size);
+
+            leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
+        }
+    }
+
+    //if there are FFR data buffers to pull
+    // if we can pull a buffer
+    //  generate a path
+
+    //const auto fftBounds = getLocalBounds().toFloat();
+    //const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+
+    //const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+
+    //while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0) //Do we have more than 0 fft blocks available
+    //{
+    //    std::vector<float> fftData; //Will contain fft data if we are able to pull a fft block
+
+    //    if (leftChannelFFTDataGenerator.getFFTData(fftData)) //Try to pull a fft block
+    //    {
+    //        pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+    //    }
+    //}
+
+    //While there are path that can be pulled
+    // pull as pany as we can
+    //  display the most recent one
+
+    //while (pathProducer.getNumPathsAvailable())
+    //{
+    //    pathProducer.getPath(leftChannelFFTPath);
+    //}
+
     if (parametersChanged.compareAndSetBool(false, true))
     {
         updateResponseCurve();
         updateThumbsFromParameters();
-
-        repaint();
     }
+
+    repaint();
+
 }
 
 void ResponseCurveComponent::drawResultingResponseCurve(juce::Graphics& g)
@@ -160,5 +233,50 @@ void ResponseCurveComponent::updateThumbsFromParameters()
         auto y = map(chainSettings.bandSettings[i].band_gain);
 
         thumbs[i].setPosition(x, y);
+    }
+}
+
+void ResponseCurveComponent::drawFFTLines(juce::Graphics& g,
+    const std::vector<float>& renderData,
+    int fftSize,
+    float binWidth,
+    float negativeInfinity)
+{
+    auto fftBounds = getLocalBounds().toFloat();
+    auto top = fftBounds.getY();
+    auto bottom = fftBounds.getBottom();
+    auto width = fftBounds.getWidth();
+
+    int numBins = (int)fftSize / 2;
+
+    auto map = [bottom, top, negativeInfinity](float v)
+        {
+            return juce::jmap(v,
+                negativeInfinity, 0.f,
+                float(bottom), top);
+        };
+
+    auto y = map(renderData[0]);
+
+    jassert(!std::isnan(y) && !std::isinf(y));
+
+    const int pathResolution = 2;
+
+    for (int binNum = 1; binNum < numBins; binNum += pathResolution)
+    {
+        y = map(renderData[binNum]);
+        jassert(!std::isnan(y) && !std::isinf(y));
+
+        if (!std::isnan(y) && !std::isinf(y))
+        {
+            auto binFreq = binNum * binWidth;
+            auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
+            int binX = std::floor(normalizedBinX * width);
+
+            float alpha = (y) / getHeight();
+            DBG(getHeight());
+            g.setColour(juce::Colour::fromFloatRGBA(1.f, 0, 0, 1 - alpha));
+            g.drawLine(binX, top, binX, bottom, 1.f);
+        }
     }
 }
